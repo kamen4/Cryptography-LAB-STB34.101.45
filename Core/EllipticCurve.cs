@@ -34,7 +34,6 @@ public class EllipticCurve
     /// <summary>
     /// Стандартные параметры СТБ 34.101.45, l=128
     /// </summary>
-    #warning LAB_1_1
     public static EllipticCurve GetStandardCurve()
     {
         return new EllipticCurve(
@@ -67,7 +66,6 @@ public class EllipticCurve
     /// <summary>
     /// Алгоритм вычисления базовой точки
     /// </summary>
-    #warning LAB_2
     public static ECPoint ComputeBasePoint(BigInteger p, BigInteger b)
     {
         return new(BigInteger.Zero, BigInteger.ModPow(b, (p + 1) / 4, p));
