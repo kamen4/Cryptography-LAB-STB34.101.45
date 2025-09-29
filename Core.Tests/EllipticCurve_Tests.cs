@@ -61,13 +61,15 @@ public class EllipticCurve_Tests
         var p = new BigInteger(17);
         var a = new BigInteger(2);
         var b = new BigInteger(3);
+        var seed = new BigInteger(3);
         var q = new BigInteger(19);
         var g = new ECPoint(1, 2);
-        var curve = new EllipticCurve(p, a, b, q, g);
+        var curve = new EllipticCurve(p, a, b, seed, q, g);
 
         Assert.Equal(p, curve.P);
         Assert.Equal(a, curve.A);
         Assert.Equal(b, curve.B);
+        Assert.Equal(seed, curve.Seed);
         Assert.Equal(q, curve.Q);
         Assert.Equal(g, curve.G);
     }
