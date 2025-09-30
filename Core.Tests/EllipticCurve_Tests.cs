@@ -73,4 +73,18 @@ public class EllipticCurve_Tests
         Assert.Equal(q, curve.Q);
         Assert.Equal(g, curve.G);
     }
+
+    [Fact]
+    public void CheckParams_ReturnsTrue_ForValidCurve()
+    {
+        var curve = EllipticCurve.GetStandardCurve();
+        Assert.True(curve.CheckParams());
+    }
+
+    [Fact]
+    public void CheckParams_ReturnsFalse_ForInvalidCurve()
+    {
+        var curve = new EllipticCurve(17, 2, 3, 3, 19, new ECPoint(1, 2));
+        Assert.False(curve.CheckParams());
+    }
 }
