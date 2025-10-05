@@ -23,5 +23,7 @@ jobs:
       run: dotnet build --no-restore
     - name: Copy TZICrypt.dll
       run: cp Core/TZICrypt.dll Core.Tests/bin/Debug/net9.0/
+    - name: Copy gp.exe
+      run: cp Core/gp.exe Core.Tests/bin/Debug/net9.0/
     - name: Test
       run: dotnet test --no-build --verbosity normal
