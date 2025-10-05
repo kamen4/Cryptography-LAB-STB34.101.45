@@ -29,7 +29,7 @@ internal class TZICrypt
     // belt-hash: хэширование (СТБ 34.101.31, п. 7.8.3)
     /// <summary>
     /// belt-hash: хэширование
-    /// </summary>
+    /// </summary>  
     /// <param name="x">[in] – указатель на сообщение</param>
     /// <param name="x_size">[in] – размер сообщения</param>
     /// <param name="y">[out] – указатель на результирующее хэш-значение (32 байта)</param>

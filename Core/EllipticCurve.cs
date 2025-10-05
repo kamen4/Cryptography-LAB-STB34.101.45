@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Text.Json.Serialization;
 using static System.String;
@@ -37,14 +38,14 @@ public class EllipticCurve
     public static EllipticCurve GetStandardCurve()
     {
         return new EllipticCurve(
-            GetFromHexString(P_DEFAULT_STB_128_BASE_16),
-            GetFromHexString(A_DEFAULT_STB_128_BASE_16),
-            GetFromHexString(B_DEFAULT_STB_128_BASE_16),
-            GetFromHexString(SEED_DEFAULT_STB_128_BASE_16),
-            GetFromHexString(Q_DEFAULT_STB_128_BASE_16),
+            MathHelper.GetFromHexString(P_DEFAULT_STB_128_BASE_16),
+            MathHelper.GetFromHexString(A_DEFAULT_STB_128_BASE_16),
+            MathHelper.GetFromHexString(B_DEFAULT_STB_128_BASE_16),
+            MathHelper.GetFromHexString(SEED_DEFAULT_STB_128_BASE_16),
+            MathHelper.GetFromHexString(Q_DEFAULT_STB_128_BASE_16),
             new ECPoint(
                 BigInteger.Zero,
-                GetFromHexString(GY_DEFAULT_STB_128_BASE_16)
+                MathHelper.GetFromHexString(GY_DEFAULT_STB_128_BASE_16)
             )
         );
     }
@@ -71,10 +72,43 @@ public class EllipticCurve
         return new(BigInteger.Zero, BigInteger.ModPow(b, (p + 1) / 4, p));
     }
 
-    public static BigInteger GetFromHexString(string s)
+    public static EllipticCurve GenerateCurveParameters(BigInteger p, BigInteger a, int l = 128)
     {
-        byte[] bytes = Convert.FromHexString(s);
-        return new(bytes, isUnsigned: true, isBigEndian: false);
+        RandomNumberGenerator rng = RandomNumberGenerator.Create();
+
+        byte[] seedBytes = new byte[8];
+        BigInteger seed;
+        BigInteger b;
+        BigInteger q;
+        do
+        {
+            do
+            {
+                rng.GetBytes(seedBytes);
+                seed = new(seedBytes, true);
+                var t_bytes = MathHelper.Combine(
+                    MathHelper.FillByteArray(p.ToByteArray(true), 2 * l / 8),
+                    MathHelper.FillByteArray(a.ToByteArray(true), 2 * l / 8));
+                byte[] b_bytes = MathHelper.Combine(
+                    MathHelper.BeltHash(MathHelper.Combine(t_bytes, MathHelper.FillByteArray(seed.ToByteArray(true), 8))),
+                    MathHelper.BeltHash(MathHelper.Combine(t_bytes, MathHelper.FillByteArray((seed + 1).ToByteArray(true), 8)))
+                );
+                b = new BigInteger(b_bytes, true) % p;
+            } while (
+                MathHelper.LegendreSymbol(b, p) != 1 ||
+                (4 * BigInteger.ModPow(a, 3, p) + 27 * BigInteger.ModPow(b, 2, p)) % p == 0);
+
+            q = Pari.CountPoints(p, a, b);
+        } while(
+            BigInteger.One << (2 * l - 1) >= q ||
+            BigInteger.One << (2 * l) <= q ||
+            !MathHelper.TestMillerRabin(q, 5) ||
+            p == q ||
+            !Enumerable.Range(1, 50).All(m => BigInteger.ModPow(p, m, q) != 1));
+
+        var g = ComputeBasePoint(p, b);
+
+        return new EllipticCurve(p, a, b, seed, q, g);
     }
 
     /// <summary>
@@ -103,7 +137,7 @@ public class EllipticCurve
             return false;
         }
         //   3) p, q — простые;
-        if (!TestMillerRabin(P, 100) || !TestMillerRabin(Q, 100))
+        if (!MathHelper.TestMillerRabin(P, 100) || !MathHelper.TestMillerRabin(Q, 100))
         {
             return false;
         }
@@ -127,14 +161,14 @@ public class EllipticCurve
         }
 
         //3. Установить t <- <p>2l || <a>2l
-        var t = Combine(
-            FillTrailingZerosLittleEnd(P.ToByteArray(true), 2 * l / 8),
-            FillTrailingZerosLittleEnd(A.ToByteArray(true), 2 * l / 8));
+        var t = MathHelper.Combine(
+            MathHelper.FillByteArray(P.ToByteArray(true), 2 * l / 8),
+            MathHelper.FillByteArray(A.ToByteArray(true), 2 * l / 8));
 
         //4. Установить B <- belt-hash(t || seed) || belt-hash(t || (seed + <1>64))
-        byte[] B_bytes = Combine(
-            BeltHash(Combine(t, FillTrailingZerosLittleEnd(Seed.ToByteArray(true), 8))),
-            BeltHash(Combine(t, FillTrailingZerosLittleEnd((Seed + 1).ToByteArray(true), 8)))
+        byte[] B_bytes = MathHelper.Combine(
+            MathHelper.BeltHash(MathHelper.Combine(t, MathHelper.FillByteArray(Seed.ToByteArray(true), 8))),
+            MathHelper.BeltHash(MathHelper.Combine(t, MathHelper.FillByteArray((Seed + 1).ToByteArray(true), 8)))
         );
         BigInteger B = new BigInteger(B_bytes, true) % P;
 
@@ -155,7 +189,7 @@ public class EllipticCurve
             return false;
         }
         //  4) (b|p) = 1;
-        if (LegendreSymbol(B, P) != 1)
+        if (MathHelper.LegendreSymbol(B, P) != 1)
         {
             return false;
         }
@@ -172,105 +206,5 @@ public class EllipticCurve
 
         //6. Возратить ДА
         return true;
-    }
-
-    /// <summary>
-    /// Тест Миллера — Рабина на простоту
-    /// </summary>
-    public static bool TestMillerRabin(BigInteger num, int certainty)
-    {
-        if (num == 2 || num == 3)
-            return true;
-        if (num < 2 || num % 2 == 0)
-            return false;
-
-        BigInteger d = num - 1;
-        int s = 0;
-
-        while (d % 2 == 0)
-        {
-            d /= 2;
-            s += 1;
-        }
-
-        RandomNumberGenerator rng = RandomNumberGenerator.Create();
-        byte[] bytes = new byte[num.ToByteArray().LongLength];
-        BigInteger a;
-
-        for (int i = 0; i < certainty; i++)
-        {
-            do
-            {
-                rng.GetBytes(bytes);
-                a = new BigInteger(bytes);
-            }
-            while (a < 2 || a >= num - 2);
-
-            BigInteger x = BigInteger.ModPow(a, d, num);
-            if (x == 1 || x == num - 1)
-                continue;
-
-            for (int r = 1; r < s; r++)
-            {
-                x = BigInteger.ModPow(x, 2, num);
-                if (x == 1)
-                    return false;
-                if (x == num - 1)
-                    break;
-            }
-
-            if (x != num - 1)
-                return false;
-        }
-
-        return true;
-    }
-
-    /// <summary>
-    /// Конкатенация масивов байт
-    /// </summary>
-    public static byte[] Combine(byte[] a, byte[] b)
-    {
-        byte[] result = new byte[a.Length + b.Length];
-        Buffer.BlockCopy(a, 0, result, 0, a.Length);
-        Buffer.BlockCopy(b, 0, result, a.Length, b.Length);
-        return result;
-    }
-
-    /// <summary>
-    /// Обертка для вызова belt-hash
-    /// </summary>
-    public static byte[] BeltHash(byte[] data)
-    {
-        byte[] hash = new byte[32];
-        TZICrypt.tzi_belt_hash(data, (uint)data.Length, hash);
-        return hash;
-    }
-
-    /// <summary>
-    /// Символ Лежандра 
-    /// </summary>
-    public static int LegendreSymbol(BigInteger u, BigInteger p)
-    {
-        if (u == 0)
-        {
-            return 0;
-        }
-        BigInteger ls = BigInteger.ModPow(u, (p - 1) / 2, p);
-        return ls == p - 1 ? -1 : (int)ls;
-    }
-
-    /// <summary>
-    /// Добавление нулей справа от массива байт до нужного размера
-    /// </summary>
-    public static byte[] FillTrailingZerosLittleEnd(byte[] arr, int totalByteLen)
-    {
-        if (arr.Length < totalByteLen)
-        {
-            byte[] newArr = new byte[totalByteLen];
-            Buffer.BlockCopy(arr, 0, newArr, 0, arr.Length);
-            return newArr;
-        }
-        return arr[..totalByteLen];
     }
 }

@@ -51,7 +51,7 @@ public class EllipticCurve_Tests
     public void GetFromHexString_ParsesCorrectly()
     {
         string hex = "0A00";
-        var value = EllipticCurve.GetFromHexString(hex);
+        var value = MathHelper.GetFromHexString(hex);
         Assert.Equal(10, value);
     }
 
@@ -86,5 +86,13 @@ public class EllipticCurve_Tests
     {
         var curve = new EllipticCurve(17, 2, 3, 3, 19, new ECPoint(1, 2));
         Assert.False(curve.CheckParams());
+    }
+
+    [Fact]
+    public void GenerateCurveParameters_ReturnsValidCurve()
+    {
+        var standart = EllipticCurve.GetStandardCurve();
+        var curve = EllipticCurve.GenerateCurveParameters(standart.P, standart.A);
+        Assert.True(curve.CheckParams());
     }
 }

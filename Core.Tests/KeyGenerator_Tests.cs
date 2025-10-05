@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Security.Cryptography;
 using Xunit;
 
 namespace Core.Tests;
@@ -56,5 +57,15 @@ public class KeyGenerator_Tests
         var zeroQ = new ECPoint(0, 0);
 
         Assert.False(KeyGenerator.CheckKey(zeroQ, curve));
+    }
+
+    [Fact]
+    public void GenerateOneTimeKey_ReturnValid_ForStandartParams()
+    {
+        var curve = EllipticCurve.GetStandardCurve();
+        var (d, Q) = KeyGenerator.GenerateKey(curve);
+        string msg = "!@#$%^&*()_+QWERTYUIOPASDFGHJKLZXCVBNM<>1234567890-=qwertyuiop[]asdfghjkl;'zxcvbnm,./";
+        var k = KeyGenerator.GenerateOneTimeKey(curve.Q, d, SHA256.HashData(msg.Select(c => (byte)c).ToArray()));
+        Assert.True(k < curve.Q && k > 0);
     }
 }
