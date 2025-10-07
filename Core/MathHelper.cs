@@ -131,15 +131,15 @@ public static class MathHelper
     {
         if (l == 128)
         {
-            return [06, 09, 60, 86, 48, 01, 65, 03, 04, 02, 01];
+            return Convert.FromHexString("0609608648016503040201");
         }
         if (l == 192)
         {
-            return [06, 09, 60, 86, 48, 01, 65, 03, 04, 02, 02];
+            return Convert.FromHexString("0609608648016503040202");
         }
         if (l == 256)
         {
-            return [06, 09, 60, 86, 48, 01, 65, 03, 04, 02, 03];
+            return Convert.FromHexString("0609608648016503040203");
         }
         throw new NotImplementedException("expecting l in {128,192,256}");
     }

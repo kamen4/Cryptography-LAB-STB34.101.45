@@ -43,7 +43,8 @@ public class KeyGenerator
     /// </summary>
     public static BigInteger GenerateOneTimeKey(BigInteger q,
         BigInteger d,
-        byte[] H)
+        byte[] H,
+        byte[]? t = null)
     {
         if (q <= 1)
         {
@@ -74,7 +75,7 @@ public class KeyGenerator
         }
 
         // 1. Выбрать t произвольным образом
-        byte[] t = [];
+        t ??= [];
 
         // 2. theta = belt-hash(OID(h) || <d>_{2l} || t)
         byte[] d2l = MathHelper.FillByteArray(d.ToByteArray(true), 2 * l / 8);

@@ -68,4 +68,7 @@ public class KeyGenerator_Tests
         var k = KeyGenerator.GenerateOneTimeKey(curve.Q, d, SHA256.HashData(msg.Select(c => (byte)c).ToArray()));
         Assert.True(k < curve.Q && k > 0);
     }
+
+    // ????? ?? ?????????
+
 }
