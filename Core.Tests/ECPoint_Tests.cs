@@ -1,4 +1,4 @@
-using System.Numerics;
+﻿using System.Numerics;
 using Xunit;
 
 namespace Core.Tests;
@@ -167,5 +167,8 @@ public class ECPoint_Tests
         var expected = ECPoint.Add(p, ECPoint.Double(p, curve), curve);
         var result = ECPoint.MultiplyScalar(p, 3, curve);
         Assert.Equal(expected, result);
-    }   
+    }
+
+    // Тесты из стандарта
+
 }

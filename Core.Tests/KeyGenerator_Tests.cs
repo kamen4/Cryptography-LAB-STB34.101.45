@@ -1,4 +1,4 @@
-using System.Numerics;
+﻿using System.Numerics;
 using System.Security.Cryptography;
 using Xunit;
 
@@ -69,6 +69,6 @@ public class KeyGenerator_Tests
         Assert.True(k < curve.Q && k > 0);
     }
 
-    // ????? ?? ?????????
+    // Тесты из стандарта
 
 }

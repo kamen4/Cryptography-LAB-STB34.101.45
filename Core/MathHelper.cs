@@ -10,7 +10,7 @@ public static class MathHelper
     /// </summary>
     public static BigInteger GetFromHexString(string s)
     {
-        byte[] bytes = Convert.FromHexString(s);
+        byte[] bytes = Convert.FromHexString(s.Replace(" ", ""));
         return new(bytes, isUnsigned: true, isBigEndian: false);
     }
 
