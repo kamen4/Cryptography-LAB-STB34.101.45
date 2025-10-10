@@ -8,17 +8,16 @@ public class KeyGenerator
     /// <summary>
     /// Алгоритм генерации пары ключей
     /// </summary>
-    public static (BigInteger d, ECPoint Q) GenerateKey(EllipticCurve curve)
+    public static (BigInteger d, ECPoint Q) GenerateKey(EllipticCurve curve, BigInteger? d = null)
     {
-        BigInteger d;
-        do
+        while (d == 0 || d is null)
         {
             var bytes = RandomNumberGenerator.GetBytes(2 * 128 / 8);
             d = new BigInteger(bytes, true) % curve.Q;
-        } while (d == 0);
+        }
 
-        var Q = ECPoint.MultiplyScalar(curve.G, d, curve);
-        return (d, Q);
+        var Q = ECPoint.MultiplyScalar(curve.G, d.Value, curve);
+        return (d.Value, Q);
     }
 
     /// <summary>
@@ -44,7 +43,8 @@ public class KeyGenerator
     public static BigInteger GenerateOneTimeKey(BigInteger q,
         BigInteger d,
         byte[] H,
-        byte[]? t = null)
+        byte[]? t = null,
+        byte[]? theta = null)
     {
         if (q <= 1)
         {
@@ -81,7 +81,7 @@ public class KeyGenerator
         byte[] d2l = MathHelper.FillByteArray(d.ToByteArray(true), 2 * l / 8);
         byte[] oid = MathHelper.GetOIDBytesSHA2l(l);
         byte[] thetaBytes = MathHelper.Combine(oid, MathHelper.Combine(d2l, t));
-        byte[] theta = MathHelper.BeltHash(thetaBytes);
+        theta ??= MathHelper.BeltHash(thetaBytes);
 
         // 3. r <- H (r = r1 || r2 || ... || rn)
         byte[][] rBlocks = new byte[n][];
