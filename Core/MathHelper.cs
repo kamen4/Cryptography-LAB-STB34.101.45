@@ -87,6 +87,9 @@ public static class MathHelper
         return hash;
     }
 
+    /// <summary>
+    /// Обертка для вызова belt-block
+    /// </summary>
     public static byte[] BeltBlock(byte[] data, byte[] key)
     {
         if (key.Length != 32)
@@ -127,6 +130,9 @@ public static class MathHelper
         return arr[..totalByteLen];
     }
 
+    /// <summary>
+    /// Получение OID для SHA-2 в зависимости от l
+    /// </summary>
     public static byte[] GetOIDBytesSHA2l(int l)
     {
         return Convert.FromHexString(l switch
