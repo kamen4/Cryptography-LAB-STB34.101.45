@@ -24,6 +24,9 @@ BE 32 97 13 43 FC 9A 48 A0 2A 88 5F 19 4B 09 A1
 A2 D7 46 52 42 A8 DF B3 69 74 C5 51 EB 23 29 21
 D4 EF D9 B4 3A 62 28 75 91 14 10 EA 77 6C DA 1D";
 
+    /// <summary>
+    /// Подстановка
+    /// </summary>
     public static readonly byte[] H;
 
     static Belt()
@@ -36,6 +39,9 @@ D4 EF D9 B4 3A 62 28 75 91 14 10 EA 77 6C DA 1D";
             .ToArray();
     }
 
+    /// <summary>
+    /// Подстановка байта по таблице H
+    /// </summary>
     public static byte Subst(byte u)
     {
         int i = u >> 4;
@@ -43,6 +49,9 @@ D4 EF D9 B4 3A 62 28 75 91 14 10 EA 77 6C DA 1D";
         return H[i * 16 + j];
     }
 
+    /// <summary>
+    /// Разбиение массива байт на блоки фиксированной длины
+    /// </summary>
     public static byte[][] Split(byte[] w, int blockBytes)
     {
         int n = (w.Length + blockBytes - 1) / blockBytes;
@@ -56,6 +65,91 @@ D4 EF D9 B4 3A 62 28 75 91 14 10 EA 77 6C DA 1D";
         return outp;
     }
 
+    /// <summary>
+    /// Разбиение массива байт на блоки фиксированной длины с обработкой null и пустого массива
+    /// </summary>
+    public static byte[][] Split1(byte[]? w, int blockBytes)
+    {
+        if (w is null || w.Length == 0)
+        {
+            return [[]];
+        }
+        return Split(w, blockBytes);
+    }
+
+    /// <summary>
+    /// Побитовое XOR двух массивов
+    /// </summary>
+    private static byte[] Xor(byte[] a, byte[] b)
+    {
+        int n = Math.Min(a.Length, b.Length);
+        int n1 = Math.Max(a.Length, b.Length);
+        var outp = new byte[n1];
+        for (int i = 0; i < n; i++)
+        {
+            outp[i] = (byte)(a[i] ^ b[i]);
+        }
+        for (int i = n; i < n1; i++)
+        {
+            outp[i] = a.Length > b.Length ? a[i] : b[i];
+        }
+        return outp;
+    }
+
+    /// <summary>
+    /// Сложение по модулю 2^n двух байтовых массивов
+    /// </summary>
+    private static byte[] Plus(byte[] a, byte[] b, int n = 32)
+    {
+        var A = new BigInteger(a, true);
+        var B = new BigInteger(b, true);
+        var n2 = BigInteger.One << n;
+        var sum = (A + B) % n2;
+        if (sum < 0) sum += n2;
+        return MathHelper.FillByteArray(sum.ToByteArray(true), n / 8);
+    }
+
+    /// <summary>
+    /// Вычитание по модулю 2^32 двух 4-байтовых массивов
+    /// </summary>
+    private static byte[] Minus(byte[] a, byte[] b)
+    {
+        var A = new BigInteger(a, true);
+        var B = new BigInteger(b, true);
+        var diff = A - B;
+        if (diff < 0) diff += BigInteger.One << 32;
+        return MathHelper.FillByteArray(diff.ToByteArray(true), 4);
+    }
+
+    /// <summary>
+    /// Обмен двух ссылок на массивы байт
+    /// </summary>
+    private static void Swap(ref byte[] a, ref byte[] b)
+    {
+        (b, a) = (a, b);
+    }
+
+    /// <summary>
+    /// Слово из n единиц
+    /// </summary>
+    /// <param name="n"></param>
+    private static byte[] NWord(int n)
+    {
+        if ((n & 7) != 0)
+        {
+            throw new ArgumentException("n must be a multiple of 8");
+        }
+        var outp = new byte[n >> 3];
+        for (int i = 0; i < outp.Length; i++)
+        {
+            outp[i] = 0xFF;
+        }
+        return outp;
+    }
+
+    /// <summary>
+    /// Алгоритм блочного шифрования belt-block
+    /// </summary>
     public static byte[] Block(byte[] X, byte[] K)
     {
         if (X.Length != 128 / 8 || K.Length != 256 / 8)
@@ -103,40 +197,6 @@ D4 EF D9 B4 3A 62 28 75 91 14 10 EA 77 6C DA 1D";
             return RotHi(a, r);
         }
 
-        byte[] xor(byte[] a, byte[] b)
-        {
-            var outp = new byte[4];
-            for (int i = 0; i < 4; i++)
-            {
-                outp[i] = (byte)(a[i] ^ b[i]);
-            }
-            return outp;
-        }
-
-        byte[] plus(byte[] a, byte[] b)
-        {
-            var A = new BigInteger(a, true);
-            var B = new BigInteger(b, true);
-            var n2 = BigInteger.One << 32;
-            var sum = (A + B) % n2;
-            if (sum < 0) sum += n2;
-            return MathHelper.FillByteArray(sum.ToByteArray(true), 4);
-        }
-
-        byte[] minus(byte[] a, byte[] b)
-        {
-            var A = new BigInteger(a, true);
-            var B = new BigInteger(b, true);
-            var diff = A - B;
-            if (diff < 0) diff += BigInteger.One << 32;
-            return MathHelper.FillByteArray(diff.ToByteArray(true), 4);
-        }
-
-        void swap(ref byte[] a, ref byte[] b)
-        {
-            (b, a) = (a, b);
-        }
-
         var a = (byte[])Xs[0].Clone();
         var b = (byte[])Xs[1].Clone();
         var c = (byte[])Xs[2].Clone();
@@ -145,18 +205,18 @@ D4 EF D9 B4 3A 62 28 75 91 14 10 EA 77 6C DA 1D";
 
         for (int i = 1; i <= 8; i++)
         {
-            b = xor(b, G(plus(a, k(7 * i - 6)), 5));
-            c = xor(c, G(plus(d, k(7 * i - 5)), 21));
-            a = minus(a, G(plus(b, k(7 * i - 4)), 13));
-            e = xor(G(plus(b, plus(c, k(7 * i - 3))), 21), [(byte)i, 0, 0, 0]);
-            b = plus(b, e);
-            c = minus(c, e);
-            d = plus(d, G(plus(c, k(7 * i - 2)), 13));
-            b = xor(b, G(plus(a, k(7 * i - 1)), 21));
-            c = xor(c, G(plus(d, k(7 * i)), 5));
-            swap(ref a, ref b);
-            swap(ref c, ref d);
-            swap(ref b, ref c);
+            b = Xor(b, G(Plus(a, k(7 * i - 6)), 5));
+            c = Xor(c, G(Plus(d, k(7 * i - 5)), 21));
+            a = Minus(a, G(Plus(b, k(7 * i - 4)), 13));
+            e = Xor(G(Plus(b, Plus(c, k(7 * i - 3))), 21), [(byte)i, 0, 0, 0]);
+            b = Plus(b, e);
+            c = Minus(c, e);
+            d = Plus(d, G(Plus(c, k(7 * i - 2)), 13));
+            b = Xor(b, G(Plus(a, k(7 * i - 1)), 21));
+            c = Xor(c, G(Plus(d, k(7 * i)), 5));
+            Swap(ref a, ref b);
+            Swap(ref c, ref d);
+            Swap(ref b, ref c);
         }
 
         var Y = new byte[16];
@@ -165,5 +225,15 @@ D4 EF D9 B4 3A 62 28 75 91 14 10 EA 77 6C DA 1D";
         Buffer.BlockCopy(a, 0, Y, 8, 4);
         Buffer.BlockCopy(c, 0, Y, 12, 4);
         return Y;
+    }
+
+    public static (byte[] S, byte[] Y) Compress(byte[] X)
+    {
+        var Xs = Split1(X, 128 / 8);
+        var S = Xor(Xor(Block(Xor(Xs[2], Xs[3]), MathHelper.Combine(Xs[0], Xs[1])), Xs[2]), Xs[3]);
+        var Y1 = Xor(Block(Xs[0], MathHelper.Combine(S, Xs[3])), Xs[0]);
+        var Y2 = Xor(Block(Xs[1], MathHelper.Combine(Xor(S, NWord(128)), Xs[2])), Xs[1]);
+        var Y = MathHelper.Combine(Y1, Y2);
+        return (S, Y);
     }
 }
