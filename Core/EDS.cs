@@ -11,7 +11,7 @@ public static class EDS
     /// </summary>
     public static byte[] Generate(EllipticCurve curve, byte[] X, BigInteger d, (byte[] OID, byte[] H, BigInteger k)? data = null)
     {
-        int l = GetL(curve.P);
+        int l = curve.GetL();
 
         byte[] OID = data is not null ? data.Value.OID : MathHelper.GetOIDBytesSHA2l(l);
         byte[] H = data is not null ? data.Value.H : l switch
@@ -51,7 +51,7 @@ public static class EDS
     /// </summary>
     public static bool Check(EllipticCurve curve, byte[] X, byte[] S, ECPoint Q, (byte[] OID, byte[] H)? data = null)
     {
-        int l = GetL(curve.P);
+        int l = curve.GetL();
 
         if (S.Length != 3 * l / 8)
         {
@@ -86,11 +86,9 @@ public static class EDS
             _ => throw new ArgumentException("Invalid Curve", nameof(curve))
         };
 
-        var R = ECPoint.Add(
-                ECPoint.MultiplyScalar(curve.G, S_1_mod + new BigInteger(H, true) % curve.Q, curve),
-                ECPoint.MultiplyScalar(Q, S_0 % curve.P + (BigInteger.One << l), curve),
-                curve
-            );
+        var d = S_1_mod + new BigInteger(H, true) % curve.Q;
+        var e = S_0 % curve.P + (BigInteger.One << l);
+        var R = ECPoint.ShamirTrick(d, curve.G, e, Q, curve);
 
         if (R.IsInfinity)
         {
@@ -116,17 +114,5 @@ public static class EDS
         }
 
         return true;
-    }
-
-    private static int GetL(BigInteger P)
-    {
-        int l = 1;
-        BigInteger pow2l = 4;
-        while (P >= pow2l)
-        {
-            l++;
-            pow2l <<= 2;
-        }
-        return l;
     }
 }

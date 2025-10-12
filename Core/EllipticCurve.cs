@@ -207,4 +207,16 @@ public class EllipticCurve
         //6. Возратить ДА
         return true;
     }
+
+    public int GetL()
+    {
+        int l = 1;
+        BigInteger pow2l = 4;
+        while (P >= pow2l)
+        {
+            l++;
+            pow2l <<= 2;
+        }
+        return l;
+    }
 }

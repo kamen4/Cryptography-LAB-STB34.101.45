@@ -10,9 +10,10 @@ public class KeyGenerator
     /// </summary>
     public static (BigInteger d, ECPoint Q) GenerateKey(EllipticCurve curve, BigInteger? d = null)
     {
+        int l = curve.GetL();
         while (d == 0 || d is null)
         {
-            var bytes = RandomNumberGenerator.GetBytes(2 * 128 / 8);
+            var bytes = RandomNumberGenerator.GetBytes(2 * l / 8);
             d = new BigInteger(bytes, true) % curve.Q;
         }
 

@@ -97,4 +97,34 @@ public class ECPoint
         if (a < 0) a += p;
         return BigInteger.ModPow(a, p - 2, p);
     }
+
+    /// <summary>
+    /// Трюк шамира для dP+eQ
+    /// </summary>
+    public static ECPoint ShamirTrick(BigInteger d, ECPoint P, BigInteger e, ECPoint Q, EllipticCurve curve)
+    {
+        var R = Add(P, Q, curve);
+        var U = Infinity;
+
+        int l = (int)Math.Max(d.GetBitLength(), e.GetBitLength());
+        for (int i = l - 1; i >= 0; i--)
+        {
+            U = Double(U, curve);
+            bool di = (d & (BigInteger.One << i)) != 0;
+            bool ei = (e & (BigInteger.One << i)) != 0;
+            if (di && ei)
+            {
+                U = Add(U, R, curve);
+            }
+            else if (di)
+            {
+                U = Add(U, P, curve);
+            }
+            else if (ei)
+            {
+                U = Add(U, Q, curve);
+            }
+        }
+        return U;
+    }
 }
