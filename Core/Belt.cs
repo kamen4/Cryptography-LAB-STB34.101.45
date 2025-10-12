@@ -6,7 +6,7 @@ namespace Core;
 
 public static class Belt
 {
-    private static string H_string = @"
+    private const string H_string = @"
 B1 94 BA C8 0A 08 F5 3B 36 6D 00 8E 58 4A 5D E4
 85 04 FA 9D 1B B6 C7 AC 25 2E 72 C2 02 FD CE 0D
 5B E3 D6 12 17 B9 61 81 FE 67 86 AD 71 6B 89 0B
@@ -134,14 +134,14 @@ D4 EF D9 B4 3A 62 28 75 91 14 10 EA 77 6C DA 1D";
 
         void swap(ref byte[] a, ref byte[] b)
         {
-            byte[] temp = a; a = b; b = temp;
+            (b, a) = (a, b);
         }
 
         var a = (byte[])Xs[0].Clone();
         var b = (byte[])Xs[1].Clone();
         var c = (byte[])Xs[2].Clone();
         var d = (byte[])Xs[3].Clone();
-        var e = new byte[4];
+        byte[] e;
 
         for (int i = 1; i <= 8; i++)
         {

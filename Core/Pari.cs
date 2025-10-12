@@ -33,28 +33,22 @@ quit;
             StandardErrorEncoding = Encoding.UTF8
         };
 
-        using (var proc = Process.Start(psi))
-        {
-            if (proc is null)
-            {
-                throw new Exception("Could not start gp.exe");
-            }
-            proc.StandardInput.WriteLine(script);
-            proc.StandardInput.Close();
+        using var proc = Process.Start(psi) ?? throw new Exception("Could not start gp.exe");
+        proc.StandardInput.WriteLine(script);
+        proc.StandardInput.Close();
 
-            string stdoutTask = proc.StandardOutput.ReadToEnd();
-            string stderrTask = proc.StandardError.ReadToEnd();
+        string stdoutTask = proc.StandardOutput.ReadToEnd();
+        string stderrTask = proc.StandardError.ReadToEnd();
 
-            proc.WaitForExit();
+        proc.WaitForExit();
 
-            if (proc.ExitCode != 0)
-                throw new Exception($"gp.exe failed (exit {proc.ExitCode}). stderr:\n{stderrTask}");
+        if (proc.ExitCode != 0)
+            throw new Exception($"gp.exe failed (exit {proc.ExitCode}). stderr:\n{stderrTask}");
 
-            var firstLine = stdoutTask.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)[0].Trim();
-            if (BigInteger.TryParse(firstLine, out var result))
-                return result;
-            else
-                throw new Exception($"Could not parse gp output. stdout:\n{stdoutTask}\nstderr:\n{stderrTask}");
-        }
+        var firstLine = stdoutTask.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)[0].Trim();
+        if (BigInteger.TryParse(firstLine, out var result))
+            return result;
+        else
+            throw new Exception($"Could not parse gp output. stdout:\n{stdoutTask}\nstderr:\n{stderrTask}");
     }
 }
