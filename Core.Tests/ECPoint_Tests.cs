@@ -168,7 +168,4 @@ public class ECPoint_Tests
         var result = ECPoint.MultiplyScalar(p, 3, curve);
         Assert.Equal(expected, result);
     }
-
-    // Тесты из стандарта
-
 }

@@ -129,18 +129,12 @@ public static class MathHelper
 
     public static byte[] GetOIDBytesSHA2l(int l)
     {
-        if (l == 128)
+        return Convert.FromHexString(l switch
         {
-            return Convert.FromHexString("0609608648016503040201");
-        }
-        if (l == 192)
-        {
-            return Convert.FromHexString("0609608648016503040202");
-        }
-        if (l == 256)
-        {
-            return Convert.FromHexString("0609608648016503040203");
-        }
-        throw new NotImplementedException("expecting l in {128,192,256}");
+            128 => "0609608648016503040201",
+            192 => "0609608648016503040202",
+            256 => "0609608648016503040203",
+            _ => throw new NotImplementedException("expecting l in {128,192,256}")
+        });
     }
 }

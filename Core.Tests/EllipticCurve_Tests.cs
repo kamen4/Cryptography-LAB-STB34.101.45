@@ -96,7 +96,4 @@ public class EllipticCurve_Tests
     //    var curve = EllipticCurve.GenerateCurveParameters(standart.P, standart.A);
     //    Assert.True(curve.CheckParams());
     //}
-
-    // Тесты из стандарта
-
 }
