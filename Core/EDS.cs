@@ -6,6 +6,9 @@ namespace Core;
 
 public static class EDS
 {
+    /// <summary>
+    /// Алгоритм формирования электронной цифровой подписи
+    /// </summary>
     public static byte[] Generate(EllipticCurve curve, byte[] X, BigInteger d, (byte[] OID, byte[] H, BigInteger k)? data = null)
     {
         int l = GetL(curve.P);
@@ -41,8 +44,11 @@ public static class EDS
         }
         var S_1 = MathHelper.FillByteArray(S_1_num.ToByteArray(true), 2 * l / 8);
         return MathHelper.Combine(S_0, S_1);
-    }   
+    }
 
+    /// <summary>
+    /// Алгоритм проверки электронной цифровой подписи
+    /// </summary>
     public static bool Check(EllipticCurve curve, byte[] X, byte[] S, ECPoint Q, (byte[] OID, byte[] H)? data = null)
     {
         int l = GetL(curve.P);
