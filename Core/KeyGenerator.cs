@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 
 namespace Core;
 
-public class KeyGenerator
+public static class KeyGenerator
 {
     /// <summary>
     /// Алгоритм генерации пары ключей
