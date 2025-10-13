@@ -86,14 +86,43 @@ public class EllipticCurve_Tests
     {
         var curve = new EllipticCurve(17, 2, 3, 3, 19, new ECPoint(1, 2));
         Assert.False(curve.CheckParams());
+
+        Console.WriteLine("TEST");
     }
 
-    //Too long
-    //[Fact]
-    //public void GenerateCurveParameters_ReturnsValidCurve()
-    //{
-    //    var standart = EllipticCurve.GetStandardCurve();
-    //    var curve = EllipticCurve.GenerateCurveParameters(standart.P, standart.A);
-    //    Assert.True(curve.CheckParams());
-    //}
+    [Fact]
+    public void GenerateCurveParameters_ReturnsValidCurve()
+    {
+        var standart = EllipticCurve.GetStandardCurve();
+        var curve = EllipticCurve.GenerateCurveParameters(standart.P, standart.A);
+        Assert.True(curve.CheckParams());
+        Console.WriteLine(@$"Generated curve:
+[x] p
+{curve.P:X}
+{curve.P}
+
+[x] a
+{curve.A:X}
+{curve.A}
+
+[x] b
+{curve.B:X}
+{curve.B}
+
+[x] q
+{curve.Q:X}
+{curve.Q}
+
+[x] seed
+{curve.Seed:X}
+{curve.Seed}
+
+[x] Gx
+{curve.G.X:X}
+{curve.G.X}
+
+[x] Gy
+{curve.G.Y:X}
+{curve.G.Y}");
+    }
 }
