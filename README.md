@@ -85,10 +85,7 @@ public static BigInteger GenerateOneTimeKey(BigInteger q, BigInteger d, byte[] H
 [EllipticCurve.cs](./Core/EllipticCurve.cs)
 
 ### Назначение
-Класс **`EllipticCurve`** реализует математическую модель эллиптической кривой над конечным полем $F_p$ вида  
-$$
-y^2 = x^3 + ax + b \pmod p
-$$
+Класс **`EllipticCurve`** реализует математическую модель эллиптической кривой над конечным полем $F_p$ вида $y^2 = x^3 + ax + b \pmod p$
 и операции, необходимые для построения и проверки параметров в соответствии со стандартом **СТБ 34.101.45**.
 
 ### Стандартные параметры
@@ -201,4 +198,4 @@ public static ECPoint Double(ECPoint p, EllipticCurve curve) => Add(p, p, curve)
 ```cs
 public static ECPoint ShamirTrick(BigInteger d, ECPoint P, BigInteger e, ECPoint Q, EllipticCurve curve)
 ```
-Находит $d*P+e*Q$ над кривой `curve` используя трюк Шамира.
+Находит $dP + eQ$ над кривой `curve` используя трюк Шамира.
