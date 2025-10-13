@@ -227,6 +227,9 @@ D4 EF D9 B4 3A 62 28 75 91 14 10 EA 77 6C DA 1D";
         return Y;
     }
 
+    /// <summary>
+    /// Алгоритм сжатия belt-compress
+    /// </summary>
     public static (byte[] S, byte[] Y) Compress(byte[] X)
     {
         var Xs = Split1(X, 128 / 8);
@@ -235,5 +238,27 @@ D4 EF D9 B4 3A 62 28 75 91 14 10 EA 77 6C DA 1D";
         var Y2 = Xor(Block(Xs[1], MathHelper.Combine(Xor(S, NWord(128)), Xs[2])), Xs[1]);
         var Y = MathHelper.Combine(Y1, Y2);
         return (S, Y);
+    }
+
+    /// <summary>
+    /// Алгоритм вычисления хеш-функции belt-hash
+    /// </summary>
+    public static byte[] Hash(byte[] X)
+    {
+        var Xs = Split1(X, 256 / 8);
+        var r = MathHelper.FillByteArray(new BigInteger(X.Length * 8).ToByteArray(true), 128 / 8);
+        var s = new byte[128 / 8];
+        var h = Convert.FromHexString("B194BAC80A08F53B366D008E584A5DE48504FA9D1BB6C7AC252E72C202FDCE0D");
+        Xs[^1] = MathHelper.Combine(Xs[^1], new byte[256 / 8 - Xs[^1].Length]);
+
+        byte[] t;
+        foreach (var xi in Xs)
+        {
+            (t, h) = Compress(MathHelper.Combine(xi, h));
+            s = Xor(s, t);
+        }
+
+        var (_, Y) = Compress(MathHelper.Combine(r, MathHelper.Combine(s, h)));
+        return Y;
     }
 }

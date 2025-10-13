@@ -2,7 +2,7 @@
 
 namespace Core;
 
-internal class TZICrypt
+public class TZICrypt
 {
     /// <summary>
     /// belt-block: зашифрование блока
@@ -13,7 +13,7 @@ internal class TZICrypt
     /// <param name="y">[out] – указатель на полученное сообщение (x_size байт)</param>
     /// <returns></returns>
     [DllImport("TZICrypt.dll")]
-    internal static extern Err_type tzi_belt_ecb_encr(byte[] x, uint x_size, byte[] k, byte[] y);
+    public static extern Err_type tzi_belt_ecb_encr(byte[] x, uint x_size, byte[] k, byte[] y);
 
     /// <summary>
     /// belt-block: расшифрование блока
@@ -24,7 +24,7 @@ internal class TZICrypt
     /// <param name="y">[out] – указатель на полученное сообщение (x_size байт)</param>
     /// <returns></returns>
     [DllImport("TZICrypt.dll")]
-    internal static extern Err_type tzi_belt_ecb_decr(byte[] x, uint x_size, byte[] k, byte[] y);
+    public static extern Err_type tzi_belt_ecb_decr(byte[] x, uint x_size, byte[] k, byte[] y);
 
     // belt-hash: хэширование (СТБ 34.101.31, п. 7.8.3)
     /// <summary>
@@ -35,13 +35,13 @@ internal class TZICrypt
     /// <param name="y">[out] – указатель на результирующее хэш-значение (32 байта)</param>
     /// <returns></returns>
     [DllImport("TZICrypt.dll")]
-    internal static extern Err_type tzi_belt_hash(byte[] x, uint x_size, byte[] y);
+    public static extern Err_type tzi_belt_hash(byte[] x, uint x_size, byte[] y);
 }
 
 /// <summary>
 /// Тип ошибки (из DLL) 
 /// </summary>
-internal enum Err_type
+public enum Err_type
 {
     TZI_OK = 0,                       // Успешное выполнение
     TZI_ERROR_INVALID_PARAM,          // Неверный параметр

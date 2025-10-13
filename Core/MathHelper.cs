@@ -82,9 +82,10 @@ public static class MathHelper
     /// </summary>
     public static byte[] BeltHash(byte[] data)
     {
-        byte[] hash = new byte[32];
-        TZICrypt.tzi_belt_hash(data, (uint)data.Length, hash);
-        return hash;
+        //byte[] hash = new byte[32];
+        //TZICrypt.tzi_belt_hash(data, (uint)data.Length, hash);
+        //return hash;
+        return Belt.Hash(data);
     }
 
     /// <summary>
@@ -92,15 +93,15 @@ public static class MathHelper
     /// </summary>
     public static byte[] BeltBlock(byte[] data, byte[] key)
     {
-        if (key.Length != 32)
-        {
-            throw new ArgumentException("Key must be 32 bytes length", nameof(key));
-        }
-        uint xsize = (uint)data.Length;
-        byte[] encr = new byte[xsize];
-
-        TZICrypt.tzi_belt_ecb_encr(data, xsize, key, encr);
-        return encr;
+        //if (key.Length != 32)
+        //{
+        //    throw new ArgumentException("Key must be 32 bytes length", nameof(key));
+        //}
+        //uint xsize = (uint)data.Length;
+        //byte[] encr = new byte[xsize];
+        //TZICrypt.tzi_belt_ecb_encr(data, xsize, key, encr);
+        //return encr;
+        return Belt.Block(data, key);
     }
 
     /// <summary>
