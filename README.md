@@ -177,12 +177,32 @@ public int GetL()
 #### Нахождение кратной точки
 ```cs
 public static ECPoint MultiplyScalar(ECPoint P, BigInteger d, EllipticCurve curve)
+
+public static ECPoint MultiplyScalarNAF(ECPoint P, BigInteger d, EllipticCurve curve)
+
+public static ECPoint MultiplyScalarAdditiveChain(ECPoint P, BigInteger d, EllipticCurve curve, List<(int, int)>? chain = null)
+
+public static ECPoint MultiplyScalarWindow(ECPoint P, BigInteger d, EllipticCurve curve, int w = 4)
+
+public static ECPoint MultiplyScalarSlidingWindow(ECPoint P, BigInteger d, EllipticCurve curve, int w = 4)
+
+public static ECPoint MultiplyScalarJacobian(ECPoint P, BigInteger d, EllipticCurve curve)
 ```
 - `ECPoint P` - Точка.
 - `BigInteger d` - скаляр.
 - `EllipticCurve curve` - эллиптическая кривая над которой выполняются операции.
 
 Возращает точку d*P, использует бинарный метод справа налево.
+
+| Method                                   | Mean        | Error       | StdDev      | Ratio | RatioSD | Rank | Gen0      | Allocated   | Alloc Ratio |
+|----------------------------------------- |------------:|------------:|------------:|------:|--------:|-----:|----------:|------------:|------------:|
+| 'Binary multiply'                        | 25,275.2 us |   480.24 us |   553.04 us |  1.00 |    0.03 |    4 |         - |   274.12 KB |        1.00 |
+| 'NAF multiply'                           | 23,376.5 us |   314.38 us |   294.07 us |  0.93 |    0.02 |    3 |         - |   254.68 KB |        0.93 |
+| 'Additive chain multiply prebuild chain' | 25,363.9 us |   472.11 us |   463.68 us |  1.00 |    0.03 |    4 |         - |   273.54 KB |        1.00 |
+| 'Additive chain multiply'                | 72,288.6 us | 1,418.34 us | 1,576.48 us |  2.86 |    0.09 |    5 | 7285.7143 | 90494.48 KB |      330.13 |
+| 'Window method (w=4)'                    | 22,720.1 us |   446.10 us |   495.84 us |  0.90 |    0.03 |    3 |         - |   242.16 KB |        0.88 |
+| 'Sliding window (w=4)'                   | 20,754.5 us |   407.02 us |   435.51 us |  0.82 |    0.02 |    2 |         - |    228.1 KB |        0.83 |
+| 'Jacobian coordinates'                   |    871.6 us |    17.42 us |    20.06 us |  0.03 |    0.00 |    1 |   43.9453 |   550.19 KB |        2.01 |
 
 #### Сложение двух точек
 ```cs

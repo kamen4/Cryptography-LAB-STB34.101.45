@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using System.Security.Cryptography;
 using Xunit;
 
 namespace Core.Tests;
@@ -167,5 +168,90 @@ public class ECPoint_Tests
         var expected = ECPoint.Add(p, ECPoint.Double(p, curve), curve);
         var result = ECPoint.MultiplyScalar(p, 3, curve);
         Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void MultiplyScalarNAF_ReturnsCorrectResult_CompareToBinary()
+    {
+        var curve = EllipticCurve.GetStandardCurve();
+        var p = curve.G;
+
+        for (int i = 0; i < 10; i++)
+        {
+            var d = new BigInteger(RandomNumberGenerator.GetBytes(20), true);
+
+            var expected = ECPoint.MultiplyScalar(p, d, curve);
+            var result = ECPoint.MultiplyScalarNAF(p, d, curve);
+
+            Assert.Equal(expected, result);
+        }
+    }
+
+    [Fact]
+    public void MultiplyScalarAdditiveChain_ReturnsCorrectResult_CompareToBinary()
+    {
+        var curve = EllipticCurve.GetStandardCurve();
+        var p = curve.G;
+
+        for (int i = 0; i < 10; i++)
+        {
+            var d = new BigInteger(RandomNumberGenerator.GetBytes(20), true);
+
+            var expected = ECPoint.MultiplyScalar(p, d, curve);
+            var result = ECPoint.MultiplyScalarAdditiveChain(p, d, curve);
+
+            Assert.Equal(expected, result);
+        }
+    }
+
+    [Fact]
+    public void MultiplyScalarWindow_ReturnsCorrectResult_CompareToBinary()
+    {
+        var curve = EllipticCurve.GetStandardCurve();
+        var p = curve.G;
+
+        for (int i = 0; i < 10; i++)
+        {
+            var d = new BigInteger(RandomNumberGenerator.GetBytes(20), true);
+
+            var expected = ECPoint.MultiplyScalar(p, d, curve);
+            var result = ECPoint.MultiplyScalarWindow(p, d, curve);
+
+            Assert.Equal(expected, result);
+        }
+    }
+
+    [Fact]
+    public void MultiplyScalarSlidingWindow_ReturnsCorrectResult_CompareToBinary()
+    {
+        var curve = EllipticCurve.GetStandardCurve();
+        var p = curve.G;
+
+        for (int i = 0; i < 10; i++)
+        {
+            var d = new BigInteger(RandomNumberGenerator.GetBytes(20), true);
+
+            var expected = ECPoint.MultiplyScalar(p, d, curve);
+            var result = ECPoint.MultiplyScalarSlidingWindow(p, d, curve);
+
+            Assert.Equal(expected, result);
+        }
+    }
+
+    [Fact]
+    public void MultiplyScalarJacobian_ReturnsCorrectResult_CompareToBinary()
+    {
+        var curve = EllipticCurve.GetStandardCurve();
+        var p = curve.G;
+
+        for (int i = 0; i < 10; i++)
+        {
+            var d = new BigInteger(RandomNumberGenerator.GetBytes(20), true);
+
+            var expected = ECPoint.MultiplyScalar(p, d, curve);
+            var result = ECPoint.MultiplyScalarJacobian(p, d, curve);
+
+            Assert.Equal(expected, result);
+        }
     }
 }
